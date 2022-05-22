@@ -84,9 +84,9 @@ int main(int, char**)
     //std::cout << classVector.at(0) << std::endl << std::endl << std::endl << classVector.at(1) << std::endl << std::endl << std::endl << classVector.at(2);
 
     // Create application window
-    WNDCLASSEX wc = { sizeof(WNDCLASSEX), CS_CLASSDC, WndProc, 0L, 0L, GetModuleHandle(NULL), NULL, NULL, NULL, NULL, _T("ImGui Example"), NULL };
+    WNDCLASSEX wc = { sizeof(WNDCLASSEX), CS_CLASSDC, WndProc, 0L, 0L, GetModuleHandle(NULL), NULL, NULL, NULL, NULL, _T("mappings viewer"), NULL };
     ::RegisterClassEx(&wc);
-    HWND hwnd = ::CreateWindow(wc.lpszClassName, _T("Dear ImGui DirectX12 Example"), WS_OVERLAPPEDWINDOW, 100, 100, 1280, 800, NULL, NULL, wc.hInstance, NULL);
+    HWND hwnd = ::CreateWindow(wc.lpszClassName, _T("mappings viewer"), WS_OVERLAPPEDWINDOW, 100, 100, 1280, 800, NULL, NULL, wc.hInstance, NULL);
 
     // Initialize Direct3D
     if (!CreateDeviceD3D(hwnd))
@@ -165,7 +165,7 @@ int main(int, char**)
         ImGui::NewFrame();
 
         // 1. Show the big demo window (Most of the sample code is in ImGui::ShowDemoWindow()! You can browse its code to learn more about Dear ImGui!).
-        if (show_demo_window)
+        if (!show_demo_window)
             ImGui::ShowDemoWindow(&show_demo_window);
 
         // 2. Show a simple window that we create ourselves. We use a Begin/End pair to created a named window.
@@ -173,12 +173,22 @@ int main(int, char**)
             static float f = 0.0f;
             static int counter = 0;
 
-            ImGui::Begin("Hello, world!");                          // Create a window called "Hello, world!" and append into it.
+            io.ConfigFlags |= ImGuiWindowFlags_NoScrollbar;
+            io.ConfigFlags |= ImGuiWindowFlags_NoMove;
+
+            static bool use_work_area = true;
+            static ImGuiWindowFlags flags = ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoSavedSettings;
+
+            const ImGuiViewport* viewport = ImGui::GetMainViewport();
+            ImGui::SetNextWindowPos(use_work_area ? viewport->WorkPos : viewport->Pos);
+            ImGui::SetNextWindowSize(use_work_area ? viewport->WorkSize : viewport->Size);
+
+            ImGui::Begin("mappings viewer", NULL, flags);                          // Create a window called "Hello, world!" and append into it.
 
             static int current_index = 0;
             static bool close = false;
-            static std::string current_item = j.at(current_index)["srgName"].get<std::string>().c_str();
-
+            //static std::string current_item = j.at(current_index)["srgName"].get<std::string>().c_str();
+            /*
             if (ImGui::BeginCombo("##combo", current_item.c_str())) // The second parameter is the label previewed before opening the combo.
             {
                 for (int n = 0; n < j.size(); n++)
@@ -193,7 +203,31 @@ int main(int, char**)
                     }
                 }
                 ImGui::EndCombo();
-            } 
+            } */
+
+            static ImGuiTextFilter filter;
+            ImGui::Text("Search:");
+            filter.Draw("##searchbar", ImGui::GetWindowSize().x / 4 - (ImGui::GetWindowSize().y * 0.01));
+            ImGui::BeginChild("listbox child", ImVec2((ImGui::GetWindowSize().x / 4 - (ImGui::GetWindowSize().y * 0.01)), ImGui::GetWindowSize().y - (ImGui::GetWindowSize().y * 0.073)));
+            for (int i = 0; i < j.size(); i++) {
+                auto paintkit = j.at(i)["srgName"].get<std::string>();
+                if (filter.PassFilter(paintkit.c_str())) {
+                    std::string label = paintkit + "##" + std::to_string(i); //do this or you will have problems selecting elements with the same name
+
+                    if (ImGui::Selectable(label.c_str())) {
+                        current_index = i;
+                    }
+                        //Menu::Config.skins[selector] = i; //used for skinchanger, ignore
+                }
+
+            }
+            ImGui::EndChild();
+
+            ImGui::SameLine();
+
+            ImGui::BeginChild("infobox child", ImVec2(ImGui::GetWindowSize().x - ImGui::GetWindowSize().x / 4 - (ImGui::GetWindowSize().y * 0.01), ImGui::GetWindowSize().y - (ImGui::GetWindowSize().y * 0.073)));
+
+            ImGui::Text("%s:", j.at(current_index)["srgName"].get<std::string>().c_str());
 
             ImGui::Text("pgk: %s", j.at(current_index)["pgk"].get<std::string>().c_str());
             ImGui::Text("obfName: %s", j.at(current_index)["obfName"].get<std::string>().c_str());
@@ -219,7 +253,9 @@ int main(int, char**)
                         ImGui::BulletText("obfName: %s", j.at(current_index)["fields"].at(i)["obfName"].dump().c_str());
                         ImGui::BulletText("srgName: %s", j.at(current_index)["fields"].at(i)["srgName"].dump().c_str());
                         ImGui::BulletText("lunarName: %s", j.at(current_index)["fields"].at(i)["lunarName"].dump().c_str());
-                        ImGui::BulletText("comment: %s", j.at(current_index)["fields"].at(i)["comment"].dump().c_str());
+                        ImGui::BulletText("");
+                        ImGui::SameLine();
+                        ImGui::TextWrapped("comment: %s", j.at(current_index)["fields"].at(i)["comment"].dump().c_str());
 
                         ImGui::TreePop();
                     }
@@ -248,10 +284,11 @@ int main(int, char**)
                         ImGui::BulletText("obfName: %s", j.at(current_index)["methods"].at(i)["obfName"].dump().c_str());
                         ImGui::BulletText("srgName: %s", j.at(current_index)["methods"].at(i)["srgName"].dump().c_str());
                         ImGui::BulletText("lunarName: %s", j.at(current_index)["methods"].at(i)["lunarName"].dump().c_str());
-                        ImGui::BulletText("comment: %s", j.at(current_index)["methods"].at(i)["comment"].dump().c_str());
                         ImGui::BulletText("srgDescriptor: %s", j.at(current_index)["methods"].at(i)["srgDescriptor"].dump().c_str());
                         ImGui::BulletText("lunarDescriptor: %s", j.at(current_index)["methods"].at(i)["lunarDescriptor"].dump().c_str());
-                        ImGui::BulletText("comment: %s", j.at(current_index)["methods"].at(i)["comment"].dump().c_str());
+                        ImGui::BulletText("");
+                        ImGui::SameLine();
+                        ImGui::TextWrapped("comment: %s", j.at(current_index)["methods"].at(i)["comment"].dump().c_str());
 
                         ImGui::TreePop();
                     }
@@ -259,6 +296,8 @@ int main(int, char**)
                 }
                 ImGui::TreePop();
             }
+
+            ImGui::EndChild();
 
             close = false;
 
