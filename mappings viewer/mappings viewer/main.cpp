@@ -61,6 +61,11 @@ FrameContext* WaitForNextFrameResources();
 void ResizeSwapChain(HWND hWnd, int width, int height);
 LRESULT WINAPI WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 
+void copy(std::string name)
+{
+    
+}
+
 // Main code
 int main(int, char**)
 {
@@ -248,9 +253,21 @@ int main(int, char**)
 
                     if (ImGui::TreeNode(final_string.c_str()))
                     {
+                        if (ImGui::Button(" ", ImVec2(8, 8)))
+                            ImGui::SetClipboardText(j.at(current_index)["fields"].at(i)["obfName"].dump().c_str());
+                        ImGui::SameLine();
                         ImGui::BulletText("obfName: %s", j.at(current_index)["fields"].at(i)["obfName"].dump().c_str());
+                        if (ImGui::Button("  ", ImVec2(8, 8)))
+                            ImGui::SetClipboardText(j.at(current_index)["fields"].at(i)["srgName"].dump().c_str());
+                        ImGui::SameLine();
                         ImGui::BulletText("srgName: %s", j.at(current_index)["fields"].at(i)["srgName"].dump().c_str());
+                        if (ImGui::Button("   ", ImVec2(8, 8)))
+                            ImGui::SetClipboardText(j.at(current_index)["fields"].at(i)["lunarName"].dump().c_str());
+                        ImGui::SameLine();
                         ImGui::BulletText("lunarName: %s", j.at(current_index)["fields"].at(i)["lunarName"].dump().c_str());
+                        if (ImGui::Button("    ", ImVec2(8, 8)))
+                            ImGui::SetClipboardText(j.at(current_index)["fields"].at(i)["comment"].dump().c_str());
+                        ImGui::SameLine();
                         ImGui::BulletText("");
                         ImGui::SameLine();
                         ImGui::TextWrapped("comment: %s", j.at(current_index)["fields"].at(i)["comment"].dump().c_str());
@@ -279,11 +296,29 @@ int main(int, char**)
 
                     if (ImGui::TreeNode(final_string.c_str()))
                     {
+                        if (ImGui::Button("     ", ImVec2(8, 8)))
+                            ImGui::SetClipboardText(j.at(current_index)["methods"].at(i)["obfName"].dump().c_str());
+                        ImGui::SameLine();
                         ImGui::BulletText("obfName: %s", j.at(current_index)["methods"].at(i)["obfName"].dump().c_str());
+                        if (ImGui::Button("      ", ImVec2(8, 8)))
+                            ImGui::SetClipboardText(j.at(current_index)["methods"].at(i)["srgName"].dump().c_str());
+                        ImGui::SameLine();
                         ImGui::BulletText("srgName: %s", j.at(current_index)["methods"].at(i)["srgName"].dump().c_str());
+                        if (ImGui::Button("       ", ImVec2(8, 8)))
+                            ImGui::SetClipboardText(j.at(current_index)["methods"].at(i)["lunarName"].dump().c_str());
+                        ImGui::SameLine();
                         ImGui::BulletText("lunarName: %s", j.at(current_index)["methods"].at(i)["lunarName"].dump().c_str());
+                        if (ImGui::Button("        ", ImVec2(8, 8)))
+                            ImGui::SetClipboardText(j.at(current_index)["methods"].at(i)["srgDescriptor"].dump().c_str());
+                        ImGui::SameLine();
                         ImGui::BulletText("srgDescriptor: %s", j.at(current_index)["methods"].at(i)["srgDescriptor"].dump().c_str());
+                        if (ImGui::Button("         ", ImVec2(8, 8)))
+                            ImGui::SetClipboardText(j.at(current_index)["methods"].at(i)["lunarDescriptor"].dump().c_str());
+                        ImGui::SameLine();
                         ImGui::BulletText("lunarDescriptor: %s", j.at(current_index)["methods"].at(i)["lunarDescriptor"].dump().c_str());
+                        if (ImGui::Button("          ", ImVec2(8, 8)))
+                            ImGui::SetClipboardText(j.at(current_index)["methods"].at(i)["comment"].dump().c_str());
+                        ImGui::SameLine();
                         ImGui::BulletText("");
                         ImGui::SameLine();
                         ImGui::TextWrapped("comment: %s", j.at(current_index)["methods"].at(i)["comment"].dump().c_str());
