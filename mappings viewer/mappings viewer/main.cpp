@@ -207,25 +207,23 @@ int main(int, char**)
 
             static ImGuiTextFilter filter;
             ImGui::Text("Search:");
-            filter.Draw("##searchbar", ImGui::GetWindowSize().x / 4 - (ImGui::GetWindowSize().y * 0.01));
-            ImGui::BeginChild("listbox child", ImVec2((ImGui::GetWindowSize().x / 4 - (ImGui::GetWindowSize().y * 0.01)), ImGui::GetWindowSize().y - (ImGui::GetWindowSize().y * 0.073)));
+            filter.Draw("##searchbar", ImGui::GetWindowSize().x / 4.f - (ImGui::GetWindowSize().y * 0.01f));
+            ImGui::BeginChild("listbox child", ImVec2((ImGui::GetWindowSize().x / 4.f - (ImGui::GetWindowSize().y * 0.01f)), ImGui::GetWindowSize().y - (ImGui::GetWindowSize().y * 0.073f)));
             for (int i = 0; i < j.size(); i++) {
                 auto paintkit = j.at(i)["srgName"].get<std::string>();
                 if (filter.PassFilter(paintkit.c_str())) {
-                    std::string label = paintkit + "##" + std::to_string(i); //do this or you will have problems selecting elements with the same name
-
+                    std::string label = paintkit + "##" + std::to_string(i);
                     if (ImGui::Selectable(label.c_str())) {
                         current_index = i;
                     }
-                        //Menu::Config.skins[selector] = i; //used for skinchanger, ignore
                 }
-
             }
+
             ImGui::EndChild();
 
             ImGui::SameLine();
 
-            ImGui::BeginChild("infobox child", ImVec2(ImGui::GetWindowSize().x - ImGui::GetWindowSize().x / 4 - (ImGui::GetWindowSize().y * 0.01), ImGui::GetWindowSize().y - (ImGui::GetWindowSize().y * 0.073)));
+            ImGui::BeginChild("infobox child", ImVec2(ImGui::GetWindowSize().x - ImGui::GetWindowSize().x / 4.f - (ImGui::GetWindowSize().y * 0.01f), ImGui::GetWindowSize().y - (ImGui::GetWindowSize().y * 0.073f)));
 
             ImGui::Text("%s:", j.at(current_index)["srgName"].get<std::string>().c_str());
 
