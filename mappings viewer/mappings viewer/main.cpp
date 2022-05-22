@@ -10,6 +10,11 @@
 #include <tchar.h>
 
 #include "json.hpp"
+#include <fstream>
+
+#include <iostream>
+
+using json = nlohmann::json;
 
 //#define DX12_ENABLE_DEBUG_LAYER
 
@@ -59,6 +64,25 @@ LRESULT WINAPI WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 // Main code
 int main(int, char**)
 {
+    // check if final.json exists
+    std::ifstream file("final.json");
+    json j;
+
+    if (!file.good()) {
+        printf("final.json not found\n");
+        return -1;
+    }
+
+    file >> j;
+
+    std::vector<json> classVector;
+
+    for (auto& element : j) {
+        classVector.push_back(element);
+    }
+
+    //std::cout << classVector.at(0) << std::endl << std::endl << std::endl << classVector.at(1) << std::endl << std::endl << std::endl << classVector.at(2);
+
     // Create application window
     WNDCLASSEX wc = { sizeof(WNDCLASSEX), CS_CLASSDC, WndProc, 0L, 0L, GetModuleHandle(NULL), NULL, NULL, NULL, NULL, _T("ImGui Example"), NULL };
     ::RegisterClassEx(&wc);
@@ -113,7 +137,11 @@ int main(int, char**)
     bool show_demo_window = true;
     bool show_another_window = false;
     ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
-
+    /*for (int n = 0; n < j.size(); n++) {
+        for (int i = 0; i < j.at(n)["fields"].size(); n++) {
+            printf("%s: %s\n", j.at(n)["srgName"].get<std::string>().c_str(), j.at(n)["fields"].at(i)["mcpName"].get<std::string>().c_str());
+        }
+    }*/
     // Main loop
     MSG msg;
     ZeroMemory(&msg, sizeof(msg));
@@ -147,29 +175,93 @@ int main(int, char**)
 
             ImGui::Begin("Hello, world!");                          // Create a window called "Hello, world!" and append into it.
 
-            ImGui::Text("This is some useful text.");               // Display some text (you can use a format strings too)
-            ImGui::Checkbox("Demo Window", &show_demo_window);      // Edit bools storing our window open/close state
-            ImGui::Checkbox("Another Window", &show_another_window);
+            static int current_index = 0;
+            static bool close = false;
+            static std::string current_item = j.at(current_index)["srgName"].get<std::string>().c_str();
 
-            ImGui::SliderFloat("float", &f, 0.0f, 1.0f);            // Edit 1 float using a slider from 0.0f to 1.0f
-            ImGui::ColorEdit3("clear color", (float*)&clear_color); // Edit 3 floats representing a color
+            if (ImGui::BeginCombo("##combo", current_item.c_str())) // The second parameter is the label previewed before opening the combo.
+            {
+                for (int n = 0; n < j.size(); n++)
+                {
+                    bool is_selected = (current_item == j.at(n)["srgName"].get<std::string>().c_str()); // You can store your selection however you want, outside or inside your objects
+                    if (ImGui::Selectable(j.at(n)["srgName"].get<std::string>().c_str(), is_selected)) {
+                        current_item = j.at(n)["srgName"].get<std::string>();
+                        close = true;
+                        current_index = n;
+                            if (is_selected)
+                                ImGui::SetItemDefaultFocus();   // You may set the initial focus when opening the combo (scrolling + for keyboard navigation support)
+                    }
+                }
+                ImGui::EndCombo();
+            } 
 
-            if (ImGui::Button("Button"))                            // Buttons return true when clicked (most widgets return true when edited/activated)
-                counter++;
-            ImGui::SameLine();
-            ImGui::Text("counter = %d", counter);
+            ImGui::Text("pgk: %s", j.at(current_index)["pgk"].get<std::string>().c_str());
+            ImGui::Text("obfName: %s", j.at(current_index)["obfName"].get<std::string>().c_str());
+            ImGui::Text("lunarPgk: %s", j.at(current_index)["lunarPgk"].get<std::string>().c_str());
+            ImGui::Text("lunarName: %s", j.at(current_index)["lunarName"].get<std::string>().c_str());
 
-            ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
-            ImGui::End();
-        }
+            if (close)
+                ImGui::SetNextItemOpen(false);
 
-        // 3. Show another simple window.
-        if (show_another_window)
-        {
-            ImGui::Begin("Another Window", &show_another_window);   // Pass a pointer to our bool variable (the window will have a closing button that will clear the bool when clicked)
-            ImGui::Text("Hello from another window!");
-            if (ImGui::Button("Close Me"))
-                show_another_window = false;
+            if (ImGui::TreeNode("fields"))
+            {
+                std::string spaces = "";
+                for (int i = 0; i < j.at(current_index)["fields"].size(); i++) {
+                    if (close)
+                        ImGui::SetNextItemOpen(false);
+                    
+                    std::string final_string = j.at(current_index)["fields"].at(i)["mcpName"].dump() + spaces;
+
+                    final_string.erase(remove(final_string.begin(), final_string.end(), '\"'), final_string.end());
+
+                    if (ImGui::TreeNode(final_string.c_str()))
+                    {
+                        ImGui::BulletText("obfName: %s", j.at(current_index)["fields"].at(i)["obfName"].dump().c_str());
+                        ImGui::BulletText("srgName: %s", j.at(current_index)["fields"].at(i)["srgName"].dump().c_str());
+                        ImGui::BulletText("lunarName: %s", j.at(current_index)["fields"].at(i)["lunarName"].dump().c_str());
+                        ImGui::BulletText("comment: %s", j.at(current_index)["fields"].at(i)["comment"].dump().c_str());
+
+                        ImGui::TreePop();
+                    }
+                    spaces += " ";
+                }
+
+                ImGui::TreePop();
+            }
+
+            if (close)
+                ImGui::SetNextItemOpen(false);
+
+            if (ImGui::TreeNode("methods"))
+            {
+                std::string spaces = "";
+                for (int i = 0; i < j.at(current_index)["methods"].size(); i++) {
+                    if (close)
+                        ImGui::SetNextItemOpen(false);
+
+                    std::string final_string = j.at(current_index)["methods"].at(i)["mcpName"].dump() + spaces;
+
+                    final_string.erase(remove(final_string.begin(), final_string.end(), '\"'), final_string.end());
+
+                    if (ImGui::TreeNode(final_string.c_str()))
+                    {
+                        ImGui::BulletText("obfName: %s", j.at(current_index)["methods"].at(i)["obfName"].dump().c_str());
+                        ImGui::BulletText("srgName: %s", j.at(current_index)["methods"].at(i)["srgName"].dump().c_str());
+                        ImGui::BulletText("lunarName: %s", j.at(current_index)["methods"].at(i)["lunarName"].dump().c_str());
+                        ImGui::BulletText("comment: %s", j.at(current_index)["methods"].at(i)["comment"].dump().c_str());
+                        ImGui::BulletText("srgDescriptor: %s", j.at(current_index)["methods"].at(i)["srgDescriptor"].dump().c_str());
+                        ImGui::BulletText("lunarDescriptor: %s", j.at(current_index)["methods"].at(i)["lunarDescriptor"].dump().c_str());
+                        ImGui::BulletText("comment: %s", j.at(current_index)["methods"].at(i)["comment"].dump().c_str());
+
+                        ImGui::TreePop();
+                    }
+                    spaces += " ";
+                }
+                ImGui::TreePop();
+            }
+
+            close = false;
+
             ImGui::End();
         }
 
