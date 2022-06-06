@@ -240,11 +240,11 @@ int main(int, char**)
                 ImGui::SetClipboardText(j.at(current_index)["obfName"].get<std::string>().c_str());
             ImGui::SameLine();
             ImGui::Text("obfName: %s", j.at(current_index)["obfName"].get<std::string>().c_str());
-            if (ImGui::Button("       ", ImVec2(8, 8)))
+            if (ImGui::Button("                    ", ImVec2(8, 8)))
                 ImGui::SetClipboardText(j.at(current_index)["lunarPgk"].get<std::string>().c_str());
             ImGui::SameLine();
             ImGui::Text("lunarPgk: %s", j.at(current_index)["lunarPgk"].get<std::string>().c_str());
-            if (ImGui::Button("       ", ImVec2(8, 8)))
+            if (ImGui::Button("                             ", ImVec2(8, 8)))
                 ImGui::SetClipboardText(j.at(current_index)["lunarName"].get<std::string>().c_str());
             ImGui::SameLine();
             ImGui::Text("lunarName: %s", j.at(current_index)["lunarName"].get<std::string>().c_str());
